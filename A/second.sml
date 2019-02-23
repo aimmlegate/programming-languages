@@ -97,6 +97,7 @@ fun remove_card (cs, c, e) =
                                       else aux(xs', x :: acc, false)
     in
         aux(cs, [], false)
+
     end
 
 fun all_same_color cardlist =
@@ -104,3 +105,43 @@ fun all_same_color cardlist =
             [] => true
           | _::[] => true
           | head::(neck::rest) => (card_color(head) = card_color(neck) andalso all_same_color (neck::rest))
+
+fun sum_cards cardlist =
+    let fun aux (lst, acc) =
+            case (lst, acc) of
+                ([], acc) => acc
+              | (x::xs', acc) => aux(xs', acc + card_value(x))
+    in
+        aux(cardlist, 0)
+    end
+
+fun score (cardlist, goal) =
+    let
+        val summ = sum_cards cardlist
+    in
+        case (all_same_color cardlist, summ > goal, summ) of
+           (false, true, summ) => (summ - goal) * 3
+         | (false, false, summ) => goal - summ
+         | (true, true, summ) => ((summ - goal) * 3) div 2
+         | (true, false, summ) => (goal - summ) div 2
+    end
+
+fun officiate (cards, moves, goal) =
+    let
+        fun aux (cards, hand, moves) =
+            case (cards, hand, moves) of
+               (_, hand, []) => score (hand, goal)
+             | ([], hand, Draw::_) => score (hand, goal)
+             | (c::cs', hand, Draw::ms') => let val new_hand = c::hand
+                                           in
+                                               if sum_cards new_hand > goal
+                                               then score (new_hand, goal)
+                                               else aux (cs', new_hand, ms')
+                                           end
+             | (cards, hand, (Discard card)::ms') => aux(cards, remove_card(hand, card, IllegalMove), ms')
+    in
+        aux (cards, [], moves)
+    end
+
+
+        
