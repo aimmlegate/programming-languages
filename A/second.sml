@@ -62,13 +62,45 @@ fun similar_names (list, record) =
 (* you may assume that Num is always used with values 2, 3, ..., 10
    though it will not really come up *)
 datatype suit = Clubs | Diamonds | Hearts | Spades
-datatype rank = Jack | Queen | King | Ace | Num of int 
+datatype rank = Jack | Queen | King | Ace | Num of int
 type card = suit * rank
 
 datatype color = Red | Black
-datatype move = Discard of card | Draw 
+datatype move = Discard of card | Draw
 
 exception IllegalMove
 
 
 (* put your solutions for problem 2 here *)
+
+fun card_color (card) =
+    case card of
+        (Clubs, _) => Black
+      | (Spades, _)  => Black
+      | _ => Red
+
+fun card_value (card) =
+    case card of
+       (_, Num i) => i
+     | (_, Ace) => 10
+     | _ => 11
+
+fun remove_card (cs, c, e) =
+    let
+        fun aux (lst, acc, check) =
+            case (lst, acc, check) of
+               ([], _, false) => raise e
+             | ([], acc, true) => acc
+             | (lst, acc, true) => aux([], acc @ lst, true)
+             | (x::xs', acc, false) => if x = c
+                                      then aux(xs', acc, true)
+                                      else aux(xs', x :: acc, false)
+    in
+        aux(cs, [], false)
+    end
+
+fun all_same_color cardlist =
+        case cardlist of
+            [] => true
+          | _::[] => true
+          | head::(neck::rest) => (card_color(head) = card_color(neck) andalso all_same_color (neck::rest))
