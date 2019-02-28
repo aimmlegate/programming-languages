@@ -79,3 +79,26 @@ val longest_capitalized = longest_string3 o only_capitals
 (*6*)
 
 val rev_string = String.implode o List.rev o String.explode
+
+(*7*)
+
+fun first_answer f list =
+    case list of
+       [] => raise NoAnswer
+     | hd::tl => let val answer = f hd in
+                     if isSome answer then valOf answer
+                     else first_answer f tl
+                 end
+
+fun all_answers f list =
+    let
+        fun aux (lst, acc) =
+            case (lst, acc) of
+               ([], []) => SOME []
+             | ([], acc) => SOME acc
+             | (NONE::tl, _) => NONE
+             | (SOME(i)::tl, _) => aux(tl, acc @ i)
+    in
+        aux(List.map f list, [])
+    end
+ 
