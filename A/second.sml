@@ -79,11 +79,13 @@ fun card_color (card) =
       | (Spades, _)  => Black
       | _ => Red
 
-fun card_value (card) =
+fun card_value card =
     case card of
-       (_, Num i) => i
-     | (_, Ace) => 10
-     | _ => 11
+        (_,Num n) => n
+	    | (_,Jack) => 10
+      | (_,Queen) => 10
+      | (_,King) => 10
+      | (_,Ace) => 11
 
 fun remove_card (cs, c, e) =
     let
@@ -142,6 +144,7 @@ fun officiate (cards, moves, goal) =
     in
         aux (cards, [], moves)
     end
+        
 
 
         
