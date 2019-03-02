@@ -112,9 +112,10 @@ fun check_pat pattern =
     let
         fun concat pat =
             case pat of
-               Variable x => [x]
-             | TupleP x   => List.foldl (fn (p, init) => init @ concat p) [] x
-             | _          => []
+               Variable x          => [x]
+             | TupleP x            => List.foldl (fn (p, init) => init @ concat p) [] x
+             | ConstructorP (_, x) => concat(x)
+             | _                   => []
         fun is_set list =
             case list of
                []     => true
@@ -133,7 +134,8 @@ fun match (valu, pattern) =
      | (ConstP x, Const y)   => if x = y then SOME [] else NONE
      | (TupleP ps, Tuple vs) =>
                                let
-                                  val innerTuple = all_answers match (ListPair.zip(vs, ps))
+                                   val innerTuple = all_answers match (ListPair.zipEq(vs, ps))
+                                   handle  UnequalLengths => NONE
                                in
                                   if isSome innerTuple then innerTuple else NONE
                                end
