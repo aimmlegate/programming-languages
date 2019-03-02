@@ -45,28 +45,19 @@ fun only_capitals strings =
 
 fun longest_string1 strings =
     List.foldl (fn (string, init) =>
-                   if String.size string > String.size init
-                   then string
-                   else init
-               ) "" strings
+                   if String.size string > String.size init then string else init) "" strings
 
 (*3*)
 
 fun longest_string2 strings =
     List.foldl (fn (string, init) =>
-                   if String.size string >= String.size init
-                   then string
-                   else init
-               ) "" strings
+                   if String.size string >= String.size init then string else init) "" strings
 
 (*4*)
 
 fun longest_string_helper pr strings =
     List.foldl (fn (string, init) =>
-                   if pr (String.size string, String.size init)
-                   then string
-                   else init
-               ) "" strings
+                   if pr (String.size string, String.size init) then string else init) "" strings
 
 val longest_string3 = longest_string_helper (fn (s, i) => s > i)
 
@@ -84,11 +75,13 @@ val rev_string = String.implode o List.rev o String.explode
 
 fun first_answer f list =
     case list of
-       [] => raise NoAnswer
-     | hd::tl => let val answer = f hd in
-                     if isSome answer then valOf answer
-                     else first_answer f tl
-                 end
+       []     => raise NoAnswer
+     | hd::tl =>
+                let
+                   val answer = f hd
+                in
+                   if isSome answer then valOf answer else first_answer f tl
+                end
 
 (*8*)
 
@@ -96,9 +89,9 @@ fun all_answers f list =
     let
         fun aux (lst, acc) =
             case (lst, acc) of
-               ([], []) => SOME []
-             | ([], acc) => SOME acc
-             | (NONE::tl, _) => NONE
+               ([], [])         => SOME []
+             | ([], acc)        => SOME acc
+             | (NONE::tl, _)    => NONE
              | (SOME(i)::tl, _) => aux(tl, acc @ i)
     in
         aux(List.map f list, [])
@@ -110,6 +103,22 @@ val count_wildcards = g (fn () => 1) (fn (_) => 0)
 
 val count_wild_and_variable_lengths = g (fn () => 1) (fn (s) => String.size s)
 
-fun count_some_var (string, pattern) = g (fn () => 0) (fn (s) => if s = string then 1 else 0) pattern
+fun count_some_var (string, pattern) =
+    g (fn () => 0) (fn (s) => if s = string then 1 else 0) pattern
 
-                                         
+(*10*)
+
+fun check_pat pattern =
+    let
+        fun concat pat =
+            case pat of
+               Variable x => [x]
+             | TupleP x   => List.foldl (fn (p, init) => init @ concat p) [] x
+             | _          => []
+        fun is_set list =
+            case list of
+               []     => true
+             | x::xs' => if List.exists(fn (el) => el = x) xs' then false else is_set xs'
+    in
+        is_set (concat pattern)
+    end
