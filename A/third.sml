@@ -90,6 +90,8 @@ fun first_answer f list =
                      else first_answer f tl
                  end
 
+(*8*)
+
 fun all_answers f list =
     let
         fun aux (lst, acc) =
@@ -101,4 +103,13 @@ fun all_answers f list =
     in
         aux(List.map f list, [])
     end
- 
+
+(*9*)
+
+val count_wildcards = g (fn () => 1) (fn (_) => 0)
+
+val count_wild_and_variable_lengths = g (fn () => 1) (fn (s) => String.size s)
+
+fun count_some_var (string, pattern) = g (fn () => 0) (fn (s) => if s = string then 1 else 0) pattern
+
+                                         
