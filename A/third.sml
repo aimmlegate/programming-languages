@@ -122,3 +122,30 @@ fun check_pat pattern =
     in
         is_set (concat pattern)
     end
+
+(*11*)
+
+fun match (valu, pattern) =
+    case (pattern, valu) of
+       (Wildcard, _)         => SOME []
+     | (Variable s, v)       => SOME [(s, v)]
+     | (UnitP, Unit)         => SOME []
+     | (ConstP x, Const y)   => if x = y then SOME [] else NONE
+     | (TupleP ps, Tuple vs) =>
+                               let
+                                  val innerTuple = all_answers match (ListPair.zip(vs, ps))
+                               in
+                                  if isSome innerTuple then innerTuple else NONE
+                               end
+     | (ConstructorP(s1,p), Constructor(s2,v)) => if s1 = s2 then match (v, p) else NONE
+     | _ => NONE
+
+
+fun first_match value patterns =
+    let
+        val m = first_answer (fn p => match(value, p)) patterns
+    in
+        SOME m
+    end
+        handle NoAnswer => NONE
+
