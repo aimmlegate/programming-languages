@@ -48,7 +48,7 @@
            [dog "dog.jpg"]
            [f (lambda (str) (cons str (lambda () (f (if (string=? str dog) dan dog)))))])
   (lambda () (f dan))))
-
+ 
 ;;7
 (define (stream-add-zero stream)
   (letrec ([f (lambda (s)
@@ -58,5 +58,15 @@
   (lambda () (f stream))))
 
 ;;8
+(define (make-stream list)
+  (letrec ([f (lambda (l)
+                (cons
+                 (if (null? l) (car list) (car l))
+                 (lambda () (f (if (null? l) (cdr list) (cdr l))))))])
+    (lambda() (f list))))
 
-  
+(define (cycle-lists xs ys)
+  (letrec ([f (lambda (stream-xs stream-ys)
+               (cons (cons (car (stream-xs)) (car (stream-xs)))
+                     (lambda () (f stream-xs stream-ys))))])
+    (lambda () (f (make-stream xs) (make-stream ys)))))
