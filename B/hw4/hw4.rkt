@@ -67,6 +67,6 @@
 
 (define (cycle-lists xs ys)
   (letrec ([f (lambda (stream-xs stream-ys)
-               (cons (cons (car (stream-xs)) (car (stream-xs)))
-                     (lambda () (f stream-xs stream-ys))))])
+               (cons (cons (car (stream-xs)) (car (stream-ys)))
+                     (lambda () (f (cdr (stream-xs)) (cdr (stream-ys))))))])
     (lambda () (f (make-stream xs) (make-stream ys)))))
