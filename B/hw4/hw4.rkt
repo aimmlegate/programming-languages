@@ -5,8 +5,6 @@
 
 ;; put your code below
 
-(define ones (lambda () (cons 1 ones)))
-
 ;;1
 (define (sequence low hight stride)
   (define (aux l acc)
@@ -39,7 +37,9 @@
 ;;5
 (define funny-number-stream
   (letrec ([f (lambda (x)
-                (cons x (lambda () (f (let ([next (+ (abs x) 1)]) (if (= (remainder next 5) 0) (- 0 next) next))))))])
+                (cons x (lambda () (f
+                                    (let ([next (+ (abs x) 1)])
+                                      (if (= (remainder next 5) 0) (- 0 next) next))))))])
     (lambda () (f 1))))
 
 ;;6
