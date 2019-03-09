@@ -5,6 +5,8 @@
 
 ;; put your code below
 
+(define ones (lambda () (cons 1 ones)))
+
 ;;1
 (define (sequence low hight stride)
   (define (aux l acc)
@@ -39,4 +41,22 @@
   (letrec ([f (lambda (x)
                 (cons x (lambda () (f (let ([next (+ (abs x) 1)]) (if (= (remainder next 5) 0) (- 0 next) next))))))])
     (lambda () (f 1))))
+
+;;6
+(define dan-then-dog
+  (letrec ([dan "dan.jpg"]
+           [dog "dog.jpg"]
+           [f (lambda (str) (cons str (lambda () (f (if (string=? str dog) dan dog)))))])
+  (lambda () (f dan))))
+
+;;7
+(define (stream-add-zero stream)
+  (letrec ([f (lambda (s)
+                (let ([stream-val (car (s))]
+                      [stream-fn (cdr (s))])
+                  (cons (cons 0 stream-val) (lambda () (f stream-fn)))))])
+  (lambda () (f stream))))
+
+;;8
+
   
