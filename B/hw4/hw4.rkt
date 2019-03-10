@@ -86,7 +86,7 @@
 
 ;;10
 (define (cached-assoc xs n)
-  (letrec ([cache (make-vector n 0)]
+  (letrec ([cache (make-vector n #f)]
            [next-slot 0]
            [f (λ (v)
                 (let ([from-cache (vector-assoc v cache)])
@@ -94,7 +94,7 @@
                       from-cache
                       (let ([from-assoc (assoc v xs)])
                         (vector-set! cache next-slot from-assoc)
-                        (set! next-slot (if (= next-slot n) 0 (+ next-slot 1)))
+                        (set! next-slot (if (> next-slot n) 0 (+ next-slot 1)))
                         from-assoc))))])
   f))
 
