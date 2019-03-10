@@ -93,8 +93,9 @@
                   (if from-cache
                       from-cache
                       (let ([from-assoc (assoc v xs)])
-                        (vector-set! cache next-slot from-assoc)
-                        (set! next-slot (if (> next-slot n) 0 (+ next-slot 1)))
-                        from-assoc))))])
+                        (begin
+                          (vector-set! cache next-slot from-assoc)
+                          (set! next-slot (if (> next-slot (- n 1)) 0 (+ next-slot 1)))
+                          from-assoc)))))])
   f))
 
