@@ -78,3 +78,11 @@
     (λ () (f (make-stream xs) (make-stream ys)))))
 
 ;;9
+(define (vector-assoc v vec)
+  (letrec ([filtred-vec (vector-filter pair? vec)]
+           [vec-with-v (vector-filter (λ (pair) (equal? v (car pair))) filtred-vec)]
+           [result (if (equal? (vector-length vec-with-v) 0)
+                       #f
+                       (vector-ref vec-with-v 0))])
+    result))
+
