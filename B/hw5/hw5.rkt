@@ -4,18 +4,18 @@
 (provide (all-defined-out)) ;; so we can put tests in a second file
 
 ;; definition of structures for MUPL programs - Do NOT change
-(struct var  (string) #:transparent)  ;; a variable, e.g., (var "foo")
-(struct int  (num)    #:transparent)  ;; a constant number, e.g., (int 17)
-(struct add  (e1 e2)  #:transparent)  ;; add two expressions
-(struct ifgreater (e1 e2 e3 e4)    #:transparent) ;; if e1 > e2 then e3 else e4
-(struct fun  (nameopt formal body) #:transparent) ;; a recursive(?) 1-argument function
-(struct call (funexp actual)       #:transparent) ;; function call
-(struct mlet (var e body) #:transparent) ;; a local binding (let var = e in body) 
-(struct apair (e1 e2)     #:transparent) ;; make a new pair
-(struct fst  (e)    #:transparent) ;; get first part of a pair
-(struct snd  (e)    #:transparent) ;; get second part of a pair
-(struct aunit ()    #:transparent) ;; unit value -- good for ending a list
-(struct isaunit (e) #:transparent) ;; evaluate to 1 if e is unit else 0
+(struct var  (string) #:transparent)  ;; a variable, e.g., (var "foo")                           +
+(struct int  (num)    #:transparent)  ;; a constant number, e.g., (int 17)                       +
+(struct add  (e1 e2)  #:transparent)  ;; add two expressions                                     +
+(struct ifgreater (e1 e2 e3 e4)    #:transparent) ;; if e1 > e2 then e3 else e4                  +
+(struct fun  (nameopt formal body) #:transparent) ;; a recursive(?) 1-argument function          +
+(struct call (funexp actual)       #:transparent) ;; function call                 
+(struct mlet (var e body) #:transparent) ;; a local binding (let var = e in body)                +
+(struct apair (e1 e2)     #:transparent) ;; make a new pair                                      +
+(struct fst  (e)    #:transparent) ;; get first part of a pair                                   +
+(struct snd  (e)    #:transparent) ;; get second part of a pair                                  +
+(struct aunit ()    #:transparent) ;; unit value -- good for ending a list                       +
+(struct isaunit (e) #:transparent) ;; evaluate to 1 if e is unit else 0                          +
 
 ;; a closure is not in "source" programs but /is/ a MUPL value; it is what functions evaluate to
 (struct closure (env fun) #:transparent) 
@@ -56,7 +56,44 @@
                (int (+ (int-num v1) 
                        (int-num v2)))
                (error "MUPL addition applied to non-number")))]
-        ;; CHANGE add more cases here
+        [(int? e) int e]
+        [(aunit? e) aunit e]
+        [(isaunit? e) (if (aunit? (eval-under-env e env)) (int 1) (int 0))]
+        [(closure? e) closure e]
+        [(fun? e) (closure env e)]
+        [(apair? e) (apair (eval-under-env (apair-e1 e) env) (eval-under-env (apair-e2 e) env))]
+        [(ifgreater? e)
+         (let ([e1 (eval-under-env (ifgreater-e1 e) env)]
+               [e2 (eval-under-env (ifgreater-e2 e) env)])
+           (if (and (int? e1) (int? e2))
+               (if ((int-num e1) > (int-num e2)) (eval-under-env (ifgreater-e3 e) env) (eval-under-env (ifgreater-e3 e) env))
+           (error "MUPL ifgreater? applied to non-number")))]
+        [(fst? e)
+         (let ([v (eval-under-env e env)])
+           (if (apair? v)
+               (apair-e1 v)
+               (error "MUPL fst? applied to non-apair")))]
+        [(snd? e)
+         (let ([v (eval-under-env e env)])
+           (if (apair? v)
+               (apair-e2 v)
+               (error "MUPL snd? applied to non-apair")))]
+        [(mlet? e)
+         (let ([v (eval-under-env (mlet-e e) env)])
+           (eval-under-env (mlet-body e) (cons (cons (mlet-var e) v) env)))]
+        [(call? e)
+         (let ([closure-val (eval-under-env (call-funexp e) env)]
+               [arguments-val (eval-under-env (call-actual e) env)])
+           (if (closure? closure-val)
+               (letrec ([closure-fun-body (fun-body (closure-fun closure-val))]
+                     [closure-fun-name (fun-nameopt (closure-fun closure-val))]
+                     [closure-fun-args-name (fun-formal (closure-fun closure-val))]
+                     [closure-fun-env (closure-env closure-val)]
+                     [extended-env (cons (cons closure-fun-args-name arguments-val) closure-fun-env)])
+                 (if closure-fun-name
+                     (eval-under-env closure-fun-body (cons (cons closure-fun-name closure-val) extended-env))
+                     (eval-under-env closure-fun-body extended-env)))
+               (error "MUPL snd? applied to non-apair")))]
         [#t (error (format "bad MUPL expression: ~v" e))]))
 
 ;; Do NOT change
