@@ -86,14 +86,14 @@
                [arguments-val (eval-under-env (call-actual e) env)])
            (if (closure? closure-val)
                (letrec ([closure-fun-body (fun-body (closure-fun closure-val))]
-                     [closure-fun-name (fun-nameopt (closure-fun closure-val))]
-                     [closure-fun-args-name (fun-formal (closure-fun closure-val))]
-                     [closure-fun-env (closure-env closure-val)]
-                     [extended-env (cons (cons closure-fun-args-name arguments-val) closure-fun-env)])
-                 (if closure-fun-name
-                     (eval-under-env closure-fun-body (cons (cons closure-fun-name closure-val) extended-env))
-                     (eval-under-env closure-fun-body extended-env)))
-               (error "MUPL snd? applied to non-apair")))]
+                        [closure-fun-name (fun-nameopt (closure-fun closure-val))]
+                        [closure-fun-args-name (fun-formal (closure-fun closure-val))]
+                        [closure-fun-env (closure-env closure-val)]
+                        [extended-env (cons (cons closure-fun-args-name arguments-val) closure-fun-env)])
+                    (if closure-fun-name
+                        (eval-under-env closure-fun-body (cons (cons closure-fun-name closure-val) extended-env))
+                        (eval-under-env closure-fun-body extended-env)))
+                  (error "MUPL snd? applied to non-apair")))]
         [#t (error (format "bad MUPL expression: ~v" e))]))
 
 ;; Do NOT change
