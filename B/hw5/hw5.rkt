@@ -67,17 +67,17 @@
                [e2 (eval-under-env (ifgreater-e2 e) env)])
            (if (and (int? e1) (int? e2))
                (if ((int-num e1) > (int-num e2)) (eval-under-env (ifgreater-e3 e) env) (eval-under-env (ifgreater-e3 e) env))
-           (error "MUPL ifgreater? applied to non-number")))]
+           (error "MUPL ifgreater applied to non-number")))]
         [(fst? e)
          (let ([v (eval-under-env e env)])
            (if (apair? v)
                (apair-e1 v)
-               (error "MUPL fst? applied to non-apair")))]
+               (error "MUPL fst applied to non-apair")))]
         [(snd? e)
          (let ([v (eval-under-env e env)])
            (if (apair? v)
                (apair-e2 v)
-               (error "MUPL snd? applied to non-apair")))]
+               (error "MUPL snd applied to non-apair")))]
         [(mlet? e)
          (let ([v (eval-under-env (mlet-e e) env)])
            (eval-under-env (mlet-body e) (cons (cons (mlet-var e) v) env)))]
@@ -93,7 +93,7 @@
                     (if closure-fun-name
                         (eval-under-env closure-fun-body (cons (cons closure-fun-name closure-val) extended-env))
                         (eval-under-env closure-fun-body extended-env)))
-                  (error "MUPL snd? applied to non-apair")))]
+                  (error "MUPL call applied to non-apair")))]
         [#t (error (format "bad MUPL expression: ~v" e))]))
 
 ;; Do NOT change
