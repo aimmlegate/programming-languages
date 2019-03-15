@@ -4,18 +4,18 @@
 (provide (all-defined-out)) ;; so we can put tests in a second file
 
 ;; definition of structures for MUPL programs - Do NOT change
-(struct var  (string) #:transparent)  ;; a variable, e.g., (var "foo")                           +
-(struct int  (num)    #:transparent)  ;; a constant number, e.g., (int 17)                       +
-(struct add  (e1 e2)  #:transparent)  ;; add two expressions                                     +
-(struct ifgreater (e1 e2 e3 e4)    #:transparent) ;; if e1 > e2 then e3 else e4                  +
-(struct fun  (nameopt formal body) #:transparent) ;; a recursive(?) 1-argument function          +
+(struct var  (string) #:transparent)  ;; a variable, e.g., (var "foo")                           
+(struct int  (num)    #:transparent)  ;; a constant number, e.g., (int 17)                       
+(struct add  (e1 e2)  #:transparent)  ;; add two expressions                                     
+(struct ifgreater (e1 e2 e3 e4)    #:transparent) ;; if e1 > e2 then e3 else e4                  
+(struct fun  (nameopt formal body) #:transparent) ;; a recursive(?) 1-argument function          
 (struct call (funexp actual)       #:transparent) ;; function call                 
-(struct mlet (var e body) #:transparent) ;; a local binding (let var = e in body)                +
-(struct apair (e1 e2)     #:transparent) ;; make a new pair                                      +
-(struct fst  (e)    #:transparent) ;; get first part of a pair                                   +
-(struct snd  (e)    #:transparent) ;; get second part of a pair                                  +
-(struct aunit ()    #:transparent) ;; unit value -- good for ending a list                       +
-(struct isaunit (e) #:transparent) ;; evaluate to 1 if e is unit else 0                          +
+(struct mlet (var e body) #:transparent) ;; a local binding (let var = e in body)                
+(struct apair (e1 e2)     #:transparent) ;; make a new pair                                      
+(struct fst  (e)    #:transparent) ;; get first part of a pair                                   
+(struct snd  (e)    #:transparent) ;; get second part of a pair                                  
+(struct aunit ()    #:transparent) ;; unit value -- good for ending a list                       
+(struct isaunit (e) #:transparent) ;; evaluate to 1 if e is unit else 0                          
 
 ;; a closure is not in "source" programs but /is/ a MUPL value; it is what functions evaluate to
 (struct closure (env fun) #:transparent) 
@@ -58,7 +58,7 @@
                (error "MUPL addition applied to non-number")))]
         [(int? e) int e]
         [(aunit? e) aunit e]
-        [(isaunit? e) (if (aunit? (eval-under-env e env)) (int 1) (int 0))]
+        [(isaunit? e) (if (aunit? (eval-under-env (isaunit-e e) env)) (int 1) (int 0))]
         [(closure? e) closure e]
         [(fun? e) (closure env e)]
         [(apair? e) (apair (eval-under-env (apair-e1 e) env) (eval-under-env (apair-e2 e) env))]
@@ -66,15 +66,15 @@
          (let ([e1 (eval-under-env (ifgreater-e1 e) env)]
                [e2 (eval-under-env (ifgreater-e2 e) env)])
            (if (and (int? e1) (int? e2))
-               (if ((int-num e1) > (int-num e2)) (eval-under-env (ifgreater-e3 e) env) (eval-under-env (ifgreater-e3 e) env))
+               (if (> (int-num e1) (int-num e2)) (eval-under-env (ifgreater-e3 e) env) (eval-under-env (ifgreater-e4 e) env))
            (error "MUPL ifgreater applied to non-number")))]
         [(fst? e)
-         (let ([v (eval-under-env e env)])
+         (let ([v (eval-under-env (fst-e) env)])
            (if (apair? v)
                (apair-e1 v)
                (error "MUPL fst applied to non-apair")))]
         [(snd? e)
-         (let ([v (eval-under-env e env)])
+         (let ([v (eval-under-env (snd-e e) env)])
            (if (apair? v)
                (apair-e2 v)
                (error "MUPL snd applied to non-apair")))]
@@ -102,11 +102,18 @@
         
 ;; Problem 3
 
-(define (ifaunit e1 e2 e3) "CHANGE")
+(define (ifaunit e1 e2 e3) (ifgreater (isaunit e1) (int 0) e2 e3))
 
-(define (mlet* lstlst e2) "CHANGE")
+(define (mlet* lstlst e2)
+  (if (null? lstlst)
+      e2
+      (let ([var (car (car lstlst))]
+            [e (cdr (car lstlst))])
+        (mlet var e (mlet* (cdr lstlst) e2)))))
 
-(define (ifeq e1 e2 e3 e4) "CHANGE")
+(define (ifeq e1 e2 e3 e4)
+  (mlet "_x" e1 (mlet "_y" e2
+                      (ifgreater (var "_x") (var "_y") e4 (ifgreater (var "_y") (var "_x") e4 e3)))))
 
 ;; Problem 4
 
