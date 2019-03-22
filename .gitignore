@@ -7,4 +7,5 @@ compiled/
 .#*
 .DS_Store
 *.bak
+*.json
 TAGS
