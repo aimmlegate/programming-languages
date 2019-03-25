@@ -78,8 +78,6 @@ class MyBoard < Board
     @delay = [@delay - 2, 80].max
   end
 
-
-
 end
 
 class MyTetris < Tetris
