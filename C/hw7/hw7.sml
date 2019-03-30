@@ -20,7 +20,7 @@ datatype geom_exp =
 	 | Intersect of geom_exp * geom_exp (* intersection expression *)
 	 | Let of string * geom_exp * geom_exp (* let s = e1 in e2 *)
 	 | Var of string
-   | Shift of real * real * geom_exp
+     | Shift of real * real * geom_exp
 (* CHANGE add shifts for expressions of the form Shift(deltaX, deltaY, exp *)
 
 exception BadProgram of string
@@ -218,3 +218,10 @@ fun preprocess_line_segment exp =
                                          else LineSegment (fx, fy, sx, sy))
        |_ => raise Impossible "error"
 
+fun preprocess_prog exp =
+	case exp of
+		LineSegment (sx,sy,fx,fy) => preprocess_line_segment(LineSegment (sx,sy,fx,fy))
+		| Intersect (e1,e2) => Intersect (preprocess_prog(e1), preprocess_prog(e2))
+		| Let (str, e1, e2) => Let (str, preprocess_prog(e1), preprocess_prog(e2))
+		| Shift (x, y, e) => Shift (x, y, preprocess_prog(e))
+		| _ => exp
