@@ -1,4 +1,5 @@
-(* University of Washington, Programming Languages, Homework 7, hw7.sml
+(* University of Washington, P
+rogramming Languages, Homework 7, hw7.sml
    (See also Ruby code.)
 *)
 
@@ -79,7 +80,8 @@ fun intersect (v1,v2) =
       | (Line _, Point _) => intersect(v2,v1)
 
       | (Line (m1,b1), Line (m2,b2)) =>
-	if real_close(m1,m2) 
+
+	      if real_close(m1,m2) 
 	then (if real_close(b1,b2)
 	      then v1 (* same line *)
 	      else  NoPoints) (* parallel lines do not intersect *)
@@ -119,7 +121,6 @@ fun intersect (v1,v2) =
 		    (end1 - epsilon <= v andalso v <= end2 + epsilon)
 		    orelse (end2 - epsilon <= v andalso v <= end1 + epsilon)
 		val (x1,y1,x2,y2) = seg
-                            
 	    in
 		if inbetween(x0,x1,x2) andalso inbetween(y0,y1,y2)
 		then Point(x0,y0)
@@ -206,10 +207,14 @@ fun eval_prog (e,env) =
 (* CHANGE: Add a case for Shift expressions *)
 
 (* CHANGE: Add function preprocess_prog of type geom_exp -> geom_exp *)
-fun preprocess_prog exp =
+fun preprocess_line_segment exp =
     case exp of
-        LineSegment (sx, sy, fx, fy) => (case (real_close(sx, fx), real_close(fx, fy)) of
-                                           (true, true)  => Point (sx, sy)
-                                         | (true, false) => LineSegment (sx, if sy < fy then sy else fy, fx, if sy < fy then fy else sy)
-                                         | _ => LineSegment(fx, fy, sx, sy))
-     | _ => exp
+        LineSegment (sx, sy, fx, fy) => (if (real_close (sx, fx) andalso real_close (sy, fy))
+                                         then Point (sx, sy)
+                                         else if (real_close (sx, fx))
+                                         then LineSegment (sx, if (sy < fy) then sy else fy, fx, if (sy < fy) then fy else sy)
+                                         else if (sx < fx)
+                                         then LineSegment (sx, sy, fx, fy)
+                                         else LineSegment (fx, fy, sx, sy))
+       |_ => raise Impossible "error"
+
