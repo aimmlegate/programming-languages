@@ -316,6 +316,16 @@ class LineSegment < GeometryValue
     other.intersectLineSegment self
   end
 
+  def intersectPoint p
+    p.intersectLineSegment self
+  end
+  def intersectLine line
+    line.intersectLineSegment self
+  end
+  def intersectVerticalLine vline
+    vline.intersectLineSegment self
+  end
+
   def intersectWithSegmentAsLineResult linesegment
     x1start = @x1
     y1start = @y1
@@ -389,7 +399,7 @@ class Intersect < GeometryExpression
   end
 
   def eval_prog env
-    @e1.intersect @e2
+    Intersect.new(e1.eval_prog(env), e2.eval_prog(env))
   end
 end
 
@@ -407,8 +417,9 @@ class Let < GeometryExpression
      Let.new(@s, @e1.preprocess_prog, @e2.preprocess_prog)
   end
 
-  def eval_prog env 
-    @e1.eval_prog(env.push([@s, @e1.eval_prog(env)]))
+  def eval_prog env
+    ext_env = Array.new(env.length) {|i| Array.new(env[i])}.push(s,e1.eval_prog(env))
+    e2.eval_prog(ext_env)
   end
 
   def shift(dx,dy)
@@ -454,7 +465,7 @@ class Shift < GeometryExpression
   end
 
   def eval_prog env 
-    @e.shift(@dx, @dy)
+    @e.eval_prog(env).shift(@dx, @dy)
   end
 
   def shift(dx,dy)
